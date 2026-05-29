@@ -311,7 +311,7 @@ export default function Page() {
                     <p className="text-zinc-300">Тип: {result.type}</p>
 
                     <p className="text-white mt-2 text-lg">
-                      Ціна: ${result.price}
+                      Ціна: {result.price} грн
                     </p>
 
                     <p className="text-zinc-300">

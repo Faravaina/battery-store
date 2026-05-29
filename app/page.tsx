@@ -10,6 +10,7 @@ type Product = {
   model: string;
   price: number;
   stock: number;
+  image_url?: string;
 };
 
 type SitePage = {
@@ -304,23 +305,32 @@ export default function Page() {
                   </div>
                 ) : result ? (
                   <div className="p-6 rounded-2xl border border-zinc-700 bg-black/70 backdrop-blur-sm">
+                    {result.image_url && (
+                      <img
+                        src={result.image_url}
+                        alt={`${result.brand} ${result.model}`}
+                        className="mb-5 h-56 w-full rounded-2xl object-cover border border-zinc-700"
+                      />
+                    )}
+
                     <h3 className="text-2xl font-semibold mb-2">
                       {result.brand} {result.model}
                     </h3>
 
                     <p className="text-zinc-300">Тип: {result.type}</p>
 
-                    <p className="text-white mt-2 text-lg">
-                      Ціна: {result.price} грн
+                    <p className="text-white mt-2 text-2xl font-bold">
+                      {result.price} грн
                     </p>
 
-                    <p className={`mt-2 font-semibold ${
-    result.stock > 0 ? "text-green-400" : "text-red-400"
-  }`}
->
-  {result.stock > 0
-    ? `🟢 В наявності: ${result.stock} шт`
-    : "🔴 Немає в наявності"}
+                    <p
+                      className={`mt-2 font-semibold ${
+                        result.stock > 0 ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
+                      {result.stock > 0
+                        ? `🟢 В наявності: ${result.stock} шт`
+                        : "🔴 Немає в наявності"}
                     </p>
 
                     <button
@@ -353,7 +363,9 @@ export default function Page() {
                           disabled={sendingOrder}
                           className="w-full rounded-xl bg-green-500 px-5 py-3 font-semibold text-black hover:bg-green-400 disabled:opacity-60"
                         >
-                          {sendingOrder ? "Відправляємо..." : "Відправити заявку"}
+                          {sendingOrder
+                            ? "Відправляємо..."
+                            : "Відправити заявку"}
                         </button>
                       </div>
                     )}

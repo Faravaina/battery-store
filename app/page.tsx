@@ -314,8 +314,13 @@ export default function Page() {
                       Ціна: {result.price} грн
                     </p>
 
-                    <p className="text-zinc-300">
-                      В наявності: {result.stock} шт
+                    <p className={`mt-2 font-semibold ${
+    result.stock > 0 ? "text-green-400" : "text-red-400"
+  }`}
+>
+  {result.stock > 0
+    ? `🟢 В наявності: ${result.stock} шт`
+    : "🔴 Немає в наявності"}
                     </p>
 
                     <button

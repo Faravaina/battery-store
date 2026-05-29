@@ -30,6 +30,12 @@ export default function Page() {
   const [model, setModel] = useState("");
   const [search, setSearch] = useState("");
 
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [orderMessage, setOrderMessage] = useState("");
+  const [sendingOrder, setSendingOrder] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -94,6 +100,41 @@ export default function Page() {
         (!model || p.model === model)
     );
   }, [type, brand, model, products]);
+
+  const sendOrder = async () => {
+    if (!result) return;
+
+    if (!customerName || !customerPhone) {
+      setOrderMessage("Заповніть ім'я та телефон");
+      return;
+    }
+
+    setSendingOrder(true);
+    setOrderMessage("");
+
+    const { error } = await supabase.from("orders").insert({
+      product_id: result.id,
+      product_brand: result.brand,
+      product_model: result.model,
+      product_type: result.type,
+      product_price: result.price,
+      customer_name: customerName,
+      customer_phone: customerPhone,
+    });
+
+    setSendingOrder(false);
+
+    if (error) {
+      console.error(error);
+      setOrderMessage("Помилка. Спробуйте ще раз.");
+      return;
+    }
+
+    setOrderMessage("Заявку відправлено. Ми скоро зв'яжемось з вами.");
+    setCustomerName("");
+    setCustomerPhone("");
+    setShowOrderForm(false);
+  };
 
   const menu = [
     { slug: "catalog", label: "Каталог" },
@@ -181,6 +222,8 @@ export default function Page() {
                             setBrand(item.brand);
                             setModel(item.model);
                             setSearch("");
+                            setShowOrderForm(false);
+                            setOrderMessage("");
                           }}
                         >
                           <p className="font-semibold">
@@ -206,6 +249,8 @@ export default function Page() {
                     setType(e.target.value);
                     setBrand("");
                     setModel("");
+                    setShowOrderForm(false);
+                    setOrderMessage("");
                   }}
                 >
                   <option value="">Тип</option>
@@ -222,6 +267,8 @@ export default function Page() {
                   onChange={(e) => {
                     setBrand(e.target.value);
                     setModel("");
+                    setShowOrderForm(false);
+                    setOrderMessage("");
                   }}
                 >
                   <option value="">Бренд</option>
@@ -235,7 +282,11 @@ export default function Page() {
                 <select
                   className="w-full p-4 rounded-xl bg-black/65 border border-zinc-700 text-white"
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
+                  onChange={(e) => {
+                    setModel(e.target.value);
+                    setShowOrderForm(false);
+                    setOrderMessage("");
+                  }}
                 >
                   <option value="">Модель</option>
                   {models.map((m) => (
@@ -266,6 +317,47 @@ export default function Page() {
                     <p className="text-zinc-300">
                       В наявності: {result.stock} шт
                     </p>
+
+                    <button
+                      onClick={() => setShowOrderForm(!showOrderForm)}
+                      className="mt-5 w-full rounded-xl bg-white px-5 py-3 font-semibold text-black hover:bg-zinc-200"
+                    >
+                      Замовити
+                    </button>
+
+                    {showOrderForm && (
+                      <div className="mt-5 space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Ваше ім'я"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          className="w-full p-4 rounded-xl bg-black/60 border border-zinc-700 text-white outline-none focus:border-white"
+                        />
+
+                        <input
+                          type="tel"
+                          placeholder="Ваш телефон"
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          className="w-full p-4 rounded-xl bg-black/60 border border-zinc-700 text-white outline-none focus:border-white"
+                        />
+
+                        <button
+                          onClick={sendOrder}
+                          disabled={sendingOrder}
+                          className="w-full rounded-xl bg-green-500 px-5 py-3 font-semibold text-black hover:bg-green-400 disabled:opacity-60"
+                        >
+                          {sendingOrder ? "Відправляємо..." : "Відправити заявку"}
+                        </button>
+                      </div>
+                    )}
+
+                    {orderMessage && (
+                      <p className="mt-4 text-sm text-zinc-300">
+                        {orderMessage}
+                      </p>
+                    )}
                   </div>
                 ) : null}
               </section>
